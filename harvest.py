@@ -49,11 +49,10 @@ def fetch(resumptionToken = "", part=0):
     if resumptionToken:
         get_url = harvest_url_continue.format(urllib.parse.quote(resumptionToken))
 
-    print("GET", get_url)
-
     try:
         # GET Request
-        response = urllib.request.urlopen(harvest_url)
+        print("GET", get_url)
+        response = urllib.request.urlopen(get_url)
         data = response.read()
 
         # Parse XML
@@ -63,6 +62,7 @@ def fetch(resumptionToken = "", part=0):
         namespaces = {'oai': 'http://www.openarchives.org/OAI/2.0/'}
         rtNode = root.find('./oai:ListRecords/oai:resumptionToken', namespaces)
         resumptionToken = rtNode.text
+        cursor = rtNode.attrib['cursor']
 
         if not resumptionToken:
             print("ERROR: unable to parse resumptionToken, stopping ...")
@@ -71,19 +71,17 @@ def fetch(resumptionToken = "", part=0):
         #print("resumptionToken={0}".format(resumptionToken))
 
         # Try setting filename until we find one that isn't in use
-        filename = ""
-        while not filename:
-            filename = "arxiv-{0}-{1}-part{2}.xml".format(harvest_set,
-                                                          harvest_format,
-                                                          part)
-            if os.path.exists(filename):
-                filename = ""
-                part += 1
+        # filename = ""
+        # while not filename:
+        filename = "arxiv-{0}-{1}-cursor{2}.xml".format(harvest_set,
+                                                        harvest_format,
+                                                        cursor)
+        if not os.path.exists(filename):
 
-        # Write to file
-        print("Writing to", filename)
-        with open(filename, 'wb') as fp:
-            fp.write(data)
+            # Write to file
+            print("Writing to", filename)
+            with open(filename, 'wb') as fp:
+                fp.write(data)
 
         print("Sleeping {0} seconds ...".format(sleep_time))
         time.sleep(sleep_time)
