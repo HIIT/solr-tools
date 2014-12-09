@@ -11,28 +11,26 @@
 import urllib.request
 import urllib.parse
 import xml.etree.ElementTree as ET
+import argparse
 import time
 import sys
 import os
 
 #------------------------------------------------------------------------------
 
-# Harvest from date YYYY-MM-DD
-# harvest_from = "2014-01-01"
-
-# Harvest from set, e.g. cs=computer science
+# Harvest from given set, e.g. cs=computer science
 # see http://export.arxiv.org/oai2?verb=ListSets
 harvest_set = "cs"
 
-# Harvest result format
-# see http://export.arxiv.org/oai2?verb=ListMetadataFormats
+# Harvest result format, see http://arxiv.org/help/oa/index
+# and http://export.arxiv.org/oai2?verb=ListMetadataFormats
 harvest_format = "oai_dc"
 
-# Url for getting records,
-# see documentation at
-# http://www.openarchives.org/OAI/2.0/openarchivesprotocol.htm#ListRecords
+# Base API url
 harvest_base_url = "http://export.arxiv.org/oai2"
 
+# API request for getting records, see documentation at
+# http://www.openarchives.org/OAI/2.0/openarchivesprotocol.htm#ListRecords
 harvest_url = harvest_base_url + "?verb=ListRecords" \
               "&set={0}&metadataPrefix={1}". \
               format(harvest_set, harvest_format)
@@ -43,14 +41,20 @@ sleep_time = 20
 
 #------------------------------------------------------------------------------
 
-def fetch(resumptionToken = "", part=0):
+def fetch(resumptionToken = "", part=0, from_date=""):
     # Set to starting url, or use the resumptionToken if that is set
     get_url = harvest_url
+
+    # Set from date if given
+    if from_date:
+        get_url += "&from=" + from_date
+
+    # If a resumption token is given, we use that only
     if resumptionToken:
         get_url = harvest_url_continue.format(urllib.parse.quote(resumptionToken))
 
     try:
-        # GET Request
+        # Request from API
         print("GET", get_url)
         response = urllib.request.urlopen(get_url)
         data = response.read()
@@ -58,30 +62,29 @@ def fetch(resumptionToken = "", part=0):
         # Parse XML
         root = ET.fromstring(data)
 
-        # Get resumptionToken from the XML
+        # Get resumptionToken element from the XML
         namespaces = {'oai': 'http://www.openarchives.org/OAI/2.0/'}
         rtNode = root.find('./oai:ListRecords/oai:resumptionToken', namespaces)
-        resumptionToken = rtNode.text
-        cursor = rtNode.attrib['cursor']
 
-        if not resumptionToken:
-            print("ERROR: unable to parse resumptionToken, stopping ...")
-            return 1
+        cursor = 0
+        resumptionToken = None
 
-        #print("resumptionToken={0}".format(resumptionToken))
+        if rtNode is not None:
+            resumptionToken = rtNode.text
+            cursor = rtNode.attrib['cursor']
 
-        # Try setting filename until we find one that isn't in use
-        # filename = ""
-        # while not filename:
+        # Form filename
         filename = "arxiv-{0}-{1}-cursor{2}.xml".format(harvest_set,
                                                         harvest_format,
                                                         cursor)
-        if not os.path.exists(filename):
+        # Write to file
+        print("Writing to", filename)
+        with open(filename, 'wb') as fp:
+            fp.write(data)
 
-            # Write to file
-            print("Writing to", filename)
-            with open(filename, 'wb') as fp:
-                fp.write(data)
+        if not resumptionToken:
+            print("No resumptionToken, stopping ...")
+            return 1
 
         print("Sleeping {0} seconds ...".format(sleep_time))
         time.sleep(sleep_time)
@@ -106,8 +109,17 @@ def fetch(resumptionToken = "", part=0):
 #------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        fetch(sys.argv[1])
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--resumptionToken', metavar='TOKEN')
+    parser.add_argument('-f', '--from', dest='from_date', metavar='DATE',
+                        help='Fetch records updated since FROM datestamp, ' + 
+                        'e.g. "2014-12-01"')
+    args = parser.parse_args()
+
+    if args.resumptionToken:
+        fetch(args.resumptionToken)
+    elif args.from_date:
+        fetch("", 0, args.from_date)
     else:
         fetch()
 
