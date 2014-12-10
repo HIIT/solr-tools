@@ -46,7 +46,8 @@ def process_file(filename, solr_update):
 
         rid = get_text('/oai:header/oai:identifier')
         field_node('id', rid)
-        field_node('last_modified', get_text('/oai:header/oai:datestamp'))
+        field_node('last_modified', get_text('/oai:header/oai:datestamp') + \
+                   'T00:00:00Z')
         field_node('set', get_text('/oai:header/oai:setSpec'))
 
         mdns = '/oai:metadata/oai_dc:dc'
