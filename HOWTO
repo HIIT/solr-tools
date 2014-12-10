@@ -1,0 +1,8 @@
+# Fetch from arXiv (e.g. articles changed since date)
+./harvest.py -f 2014-08-01
+
+# Convert arXiv xml to solr.xml for uploading
+./xml_to_solr.py arxiv*.xml
+
+# Upload over REST API
+curl 'http://localhost:8888/solr/arxiv_cs/update/' -H "Content-Type: text/xml" --data-binary @solr.xml
