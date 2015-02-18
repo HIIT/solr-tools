@@ -41,7 +41,7 @@ sleep_time = 20
 
 #------------------------------------------------------------------------------
 
-def fetch(resumptionToken = "", part=0, from_date=""):
+def fetch(resumptionToken = "", part=0, from_date="", outdir=""):
     # Set to starting url, or use the resumptionToken if that is set
     get_url = harvest_url
 
@@ -74,9 +74,11 @@ def fetch(resumptionToken = "", part=0, from_date=""):
             cursor = rtNode.attrib['cursor']
 
         # Form filename
-        filename = "arxiv-{0}-{1}-cursor{2}.xml".format(harvest_set,
-                                                        harvest_format,
-                                                        cursor)
+        if outdir != '' and outdir[-1] != '/':
+            outdir += '/'
+        filename = outdir + "arxiv-{0}-{1}-cursor{2}.xml".format(harvest_set,
+                                                                 harvest_format,
+                                                                 cursor)
         # Write to file
         print("Writing to", filename)
         with open(filename, 'wb') as fp:
@@ -100,7 +102,7 @@ def fetch(resumptionToken = "", part=0, from_date=""):
                 print("Got HTTP 503, Retry-after: {0}".format(ra))
                 print("Sleeping {0} seconds ...".format(ra))
                 time.sleep(ra)
-                return fetch(resumptionToken, part)
+                return fetch(resumptionToken, part, from_date)
 
         # Any other errors than 503 are fatal.
         print("ERROR: HTTP returned status {0}!".format(rstat))
@@ -111,15 +113,17 @@ def fetch(resumptionToken = "", part=0, from_date=""):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-r', '--resumptionToken', metavar='TOKEN')
+    parser.add_argument('-d', '--outdir', metavar='DIR', 
+                        help='place xml files in this directory')
     parser.add_argument('-f', '--from', dest='from_date', metavar='DATE',
                         help='Fetch records updated since FROM datestamp, ' + 
                         'e.g. "2014-12-01"')
     args = parser.parse_args()
 
     if args.resumptionToken:
-        fetch(args.resumptionToken)
+        fetch(args.resumptionToken, outdir=args.outdir)
     elif args.from_date:
-        fetch("", 0, args.from_date)
+        fetch("", 0, args.from_date, outdir=args.outdir)
     else:
-        fetch()
+        fetch(outdir=args.outdir)
 
