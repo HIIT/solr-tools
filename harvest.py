@@ -90,7 +90,7 @@ def fetch(resumptionToken = "", part=0, from_date="", outdir=""):
 
         print("Sleeping {0} seconds ...".format(sleep_time))
         time.sleep(sleep_time)
-        return fetch(resumptionToken, part + 1)
+        return fetch(resumptionToken, part + 1, "", outdir)
 
     except urllib.error.HTTPError as error:
         # If we are fetching too fast the server will give an HTTP 503
