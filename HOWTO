@@ -1,12 +1,25 @@
 # Fetch from arXiv (e.g. articles changed since date)
-./harvest.py -d output_dir -f 2014-08-01
+./harvest-arxiv.py -d output_dir -f 2014-08-01
 
 # To get help on options
-./harvest.py -h
+./harvest-arxiv.py -h
 
 
 # Convert arXiv xml to solr.xml for uploading
-./xml_to_solr.py arxiv*.xml
+./arxiv_to_solr.py output_dir/arxiv*.xml
+
+
+# Create a new database in Solr named "foobar"
+mkdir -p /srv/solr/foobar/data
+mkdir -p /srv/solr/foobar/conf/lang
+cp /srv/solr/solr-4.10.2/example/solr/collection1/conf/{solrconfig.xml,stopwords.txt,synonyms.txt,protwords.txt,elevate.xml} /srv/solr/foobar/conf/
+cp /srv/solr/solr-4.10.2/example/solr/collection1/conf/lang/stopwords_en.txt /srv/solr/foobar/conf/lang/
+cp schema.xml /srv/solr/foobar/conf/
+# ... and possibly modify schema.xml
+
+# go to http://localhost:8888/solr/
+# click "Core Admin" -> "+ Add Core"
+# set dataDir to /srv/solr/foobar/data
 
 
 # Upload over REST API
