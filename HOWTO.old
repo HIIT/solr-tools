@@ -1,12 +1,19 @@
+** NOTE *** this file has been superceded by README.md !!
+
+
 # Fetch from arXiv (e.g. articles changed since date)
-./harvest-arxiv.py -d output_dir -f 2014-08-01
+
+    mkdir output_dir
+    ./harvest-arxiv.py -d output_dir -f 2014-08-01
 
 # To get help on options
-./harvest-arxiv.py -h
+
+    ./harvest-arxiv.py -h
 
 
 # Convert arXiv xml to solr.xml for uploading
-./arxiv_to_solr.py output_dir/arxiv*.xml
+
+    ./arxiv_to_solr.py output_dir/arxiv*.xml
 
 
 # Create a new database in Solr named "foobar"
