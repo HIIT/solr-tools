@@ -81,7 +81,7 @@ can be uploaded in pieces to the Solr database.
 
 Finally upload this to Solr:
 
-   /opt/solr/bin/post -c arxiv-cs solr.xml
+    /opt/solr/bin/post -c arxiv-cs solr.xml
 
 You can safely upload the files many times, and upload again when new
 files are available since they have a unique `id` and any new record
