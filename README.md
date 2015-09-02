@@ -29,6 +29,16 @@ example the executable binaries can be found in `/opt/solr/bin`.
 
 ## Create a new database in Solr
 
+First you have to decide if you want to use a fixed schema for the
+database, or use the new schemaless mode. A schema is a description of
+the fields and data types of each record in the database, together
+with information on how they are processed and indexed. For more
+serious work you probably want to use a schema. However, we will first
+describe how to setup a schemaless database, this is useful for
+testing and learning Solr when you want to get started quickly.
+
+### Setup without schema
+
 Let's create a new database named `arxiv-cs`. You have to run the
 create command as the `solr` user like this:
 
@@ -41,10 +51,58 @@ you want. The `-d data_driven_schema_configs` option means that you do
 not need to specify a schema for the database, but that it will derive
 it automatically from the uploaded data.
 
-A schema is a description of the fields and data types of each record
-in the database, you can also specify the schema explicitly by
-providing your own `schema.xml`. (This will be documented here
-separately.)
+### Setup with schema
+
+In this section we will setup a database with schema. Note that this
+is an alternative to the schemaless setup described in the previous
+section. Don't do both at the same time :-)
+
+To make your life easier I have created a directory with the starting
+point already configured for arXiv data in the directory
+[`arxiv_config`](https://github.com/HIIT/solr-tools/tree/master/arxiv_config).
+The file `arxiv_config/conf/schema.xml` is the most important file
+which sets the schema. The [format is documented in the Solr wiki][2],
+but it isn't too hard to understand by just looking at the existing
+file as an example.
+
+For example:
+
+    <field name="title" type="text_en" indexed="true" stored="true"/>
+
+creates a field called "title" which will contain English text
+(`text_en`), and which is indexed and stored in the databases. The
+`text_en` field type is defined later in `schema.xml` in a
+`<fieldType>` declaration. You can see that it specifies a tokenizer,
+stop word filtering, and Porter stemming among other things.
+
+This example:
+
+    <field name="keyword" type="text_general" indexed="true" stored="true" multiValued="true"/>
+
+creates a "keyword" field of the type `text_general` (again check the
+definition later in the file). The most interesting thing here is the
+`multiValued="true"` part which specifies that you can give multiple
+keywords in your data.
+
+Then:
+
+    <field name="text" type="text_en" indexed="true" stored="false" multiValued="true" />
+    <copyField source="title" dest="text"/>
+    <copyField source="author" dest="text"/>
+    <copyField source="abstract" dest="text"/>
+
+sets up a field "text" to which title, author and abstract fields are
+copied to. This is a special field that is used as the default target
+for text searches. You can also search the other indexed field, but
+they have to be targetted explicitly.
+
+Finally, after you have made any changes to the schema you can create
+the new database (Solr core):
+
+    sudo -u solr /opt/solr/bin/solr create_core -c arxiv-cs-s -d ~/solr-tools/arxiv_config
+
+Here you might have to change the last argument to match the path
+where you have cloned this repository.
 
 ## Fetch and import data to Solr
 
@@ -100,3 +158,4 @@ A useful option to add is `fl=*,score` which causes Solr to return the
 relevance score of each result.
 
 [1]: http://lucene.apache.org/solr/
+[2]: https://wiki.apache.org/solr/SchemaXml
