@@ -55,7 +55,7 @@ it automatically from the uploaded data.
 
 In this section we will setup a database with schema. Note that this
 is an alternative to the schemaless setup described in the previous
-section. Don't do both at the same time :-)
+section.
 
 To make your life easier I have created a directory with the starting
 point already configured for arXiv data in the directory
