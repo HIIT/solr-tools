@@ -60,10 +60,11 @@ section.
 To make your life easier I have created a directory with the starting
 point already configured for arXiv data in the directory
 [`arxiv_config`](https://github.com/HIIT/solr-tools/tree/master/arxiv_config).
-The file `arxiv_config/conf/schema.xml` is the most important file
-which sets the schema. The [format is documented in the Solr wiki][2],
-but it isn't too hard to understand by just looking at the existing
-file as an example.
+The file
+[`arxiv_config/conf/schema.xml`](https://github.com/HIIT/solr-tools/blob/master/arxiv_config/conf/schema.xml)
+is the most important file which sets the schema. The
+[format is documented in the Solr wiki][2], but it isn't too hard to
+understand by just looking at the existing file as an example.
 
 For example:
 
