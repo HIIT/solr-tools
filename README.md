@@ -27,6 +27,29 @@ In the future you can start and stop Solr in the normal way:
 The Solr files have been installed in the `/opt/solr` directory, for
 example the executable binaries can be found in `/opt/solr/bin`.
 
+## Importing Wikipedia
+
+For importing from a Wikipedia XML dump there exists a ready-made
+configuration to make things easier. First you need to edit the files
+in the
+[`wikipedia_config`](https://github.com/HIIT/solr-tools/tree/master/wikipedia_config)
+directory that you get when checking out this repository. In
+particular change the `url` to the correct location of the
+`enwiki-latest-pages-articles.xml` file in
+[`arxiv_config/conf/data-config.xml`](https://github.com/HIIT/solr-tools/blob/master/wikipedia_config/conf/data-config.xml).
+
+Once you are done you can initialise the core in Solr:
+
+    sudo -u solr /opt/solr/bin/solr create_core -c enwiki -d ~/solr-tools/wikipedia_config
+
+After this you can start importing the data by going to the web UI at
+<http://localhost:8983/solr/#/enwiki/dataimport> and press Execute.
+
+If you mess everything up and wish to delete everything from the core you can run:
+
+    curl http://localhost:8983/solr/enwiki/update?commit=true -d '<delete><query>*:*</query></delete>'
+
+
 ## Create a new database in Solr
 
 First you have to decide if you want to use a fixed schema for the
