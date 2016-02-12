@@ -49,6 +49,8 @@ If you mess everything up and wish to delete everything from the core you can ru
 
     curl http://localhost:8983/solr/enwiki/update?commit=true -d '<delete><query>*:*</query></delete>'
 
+For other data sets you have to do things the more complicated way.
+Read below for more detailed information.
 
 ## Create a new database in Solr
 
