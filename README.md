@@ -12,6 +12,25 @@ change the commands below accordingly.
 
     wget http://www.nic.funet.fi/pub/mirrors/apache.org/lucene/solr/5.3.0/solr-5.3.0.tgz
     tar xvf solr-5.3.0.tgz 
+
+### Run Solr directly (Linux and OS X)
+
+Solr can now be started with:
+
+    ./solr-5.3.0/bin/solr start
+    
+It should now be up and running, just go to <http://localhost:8983> to check it out.
+
+Solr can be stopped with:
+
+    ./solr-5.3.0/bin/solr stop -all
+
+and the current status can be checked with:
+
+    ./solr-5.3.0/bin/solr status
+
+### Install and auto-start Solr (Linux only)
+
     umask 022
     sudo ./solr-5.3.0/bin/install_solr_service.sh solr-5.3.0.tgz 
 
