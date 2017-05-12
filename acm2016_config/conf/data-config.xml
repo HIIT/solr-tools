@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataConfig>
+  <dataSource type="FileDataSource" />
+
+  <script><![CDATA[
+    function f1(row) {
+        if (row.get('article_id') == null)
+            return row;
+        
+        // Join author first, middle, last name lists to a single list
+        var arr = new java.util.ArrayList();
+        var fn = row.get('author_first_name');
+        var mn = row.get('author_middle_name');
+        var ln = row.get('author_last_name');
+
+        for (var i=0; i<fn.length; i++) {
+            var a = fn[i];
+            if (mn[i].length > 0)
+                a += ' ' + mn[i];
+            a += ' ' + ln[i]
+            arr.add(a);
+        }
+    
+        row.put('author', arr);
+        row.remove('author_first_name');
+        row.remove('author_middle_name');
+        row.remove('author_last_name');
+
+        return row;
+    }
+  ]]></script>  
+  <document>
+    <entity
+        name="pickupdir"
+        processor="FileListEntityProcessor"
+        rootEntity="false"
+        dataSource="null"
+        fileName=".*xml"
+        baseDir="/home/mvsjober/tmp/xml/"
+        recursive="true"
+        >
+      
+      <entity name="xml"
+              processor="XPathEntityProcessor"
+              forEach="/proceeding/proceeding_rec|/proceeding/content/section/article_rec"
+              url="${pickupdir.fileAbsolutePath}"
+              transformer="HTMLStripTransformer,DateFormatTransformer,script:f1"
+              >
+
+        <field column="proceedings" xpath="/proceeding/proceeding_rec/proc_desc" commonField="true" />
+        <field column="isbn" xpath="/proceeding/proceeding_rec/isbn13" commonField="true" />
+              
+        <field column="article_id" xpath="/proceeding/content/section/article_rec/article_id" /> 
+        <field column="article_publication_date" xpath="/proceeding/content/section/article_rec/article_publication_date"
+               dateTimeFormat="MM-dd-yyyy"/>
+        
+        <field column="title" xpath="/proceeding/content/section/article_rec/title" stripHTML="true" />
+        <field column="subtitle" xpath="/proceeding/content/section/article_rec/subtitle" stripHTML="true" />
+        
+        <field column="page_from" xpath="/proceeding/content/section/article_rec/page_from" />
+        <field column="page_to" xpath="/proceeding/content/section/article_rec/page_to" />
+        
+        <field column="doi_number" xpath="/proceeding/content/section/article_rec/doi_number" />
+        <field column="url" xpath="/proceeding/content/section/article_rec/url" />
+        
+        <field column="abstract" xpath="/proceeding/content/section/article_rec/abstract/par" stripHTML="true" />
+        
+        <field column="keyword" xpath="/proceeding/content/section/article_rec/keywords/kw" stripHTML="true" />
+        
+        <field column="category" xpath="/proceeding/content/section/article_rec/categories//cat_node" stripHTML="true" />
+        
+        <field column="author_first_name" xpath="/proceeding/content/section/article_rec/authors/au/first_name"
+               multiValued="true" stripHTML="true" />
+        <field column="author_middle_name" xpath="/proceeding/content/section/article_rec/authors/au/middle_name"
+               multiValued="true" />
+        <field column="author_last_name" xpath="/proceeding/content/section/article_rec/authors/au/last_name"
+               multiValued="true" stripHTML="true" />
+        <!-- <field column="author" multiValued="true" /> -->
+
+        <field column="text" xpath="/proceeding/content/section/article_rec/fulltext/ft_body" stripHTML="true"/>
+      </entity>
+    </entity>
+  </document>
+</dataConfig>
